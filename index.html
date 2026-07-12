@@ -7506,6 +7506,20 @@ function globalScanAdd(barcode) {
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js').catch(e => console.warn('SW:', e));
   }
+
+  // Check owner dashboard FIRST — no need to load shop data
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('owner') === OWNER_SECRET) {
+    document.documentElement.lang = CURRENT_LANG === 'my' ? 'my' : 'en';
+    document.documentElement.setAttribute('data-theme', CURRENT_THEME);
+    const loadEl = document.getElementById('boot-loading');
+    if (loadEl) loadEl.style.display = 'none';
+    document.querySelectorAll('.pos-screen').forEach(s => s.style.display = 'none');
+    document.getElementById('app-shell').style.display = 'none';
+    showOwnerDashboard();
+    return;
+  }
+
   // Show loading overlay while fetching from Supabase
   const loadEl = document.getElementById('boot-loading');
   if (loadEl) loadEl.style.display = 'flex';
@@ -7517,13 +7531,6 @@ function globalScanAdd(barcode) {
   // Hide everything first
   document.querySelectorAll('.pos-screen').forEach(s => s.style.display = 'none');
   document.getElementById('app-shell').style.display = 'none';
-
-  // Check if owner dashboard requested
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('owner') === OWNER_SECRET) {
-    showOwnerDashboard();
-    return;
-  }
 
   if (SHOP_ID && APP.config.wizardComplete) {
     // Known device with completed setup — go straight to login
