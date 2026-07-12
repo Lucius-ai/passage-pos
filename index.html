@@ -2,8 +2,16 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
 <title>Passage POS</title>
+<link rel="manifest" href="/manifest.json"/>
+<meta name="theme-color" content="#c99a3a"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Passage POS"/>
+<link rel="apple-touch-icon" href="/icon-192.png"/>
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png"/>
 <script>
 (function(){
   try {
@@ -1375,6 +1383,7 @@ input[type=range]::-moz-range-progress{background:hsl(40,74%,60%);height:6px;bor
         <div style="font-size:.75rem;font-weight:600;color:var(--primary);text-transform:uppercase;letter-spacing:.05em" id="sidebar-role">Admin</div>
         <div style="font-size:.7rem;color:var(--muted-fg)" id="sidebar-date">Today</div>
       </div>
+      <button class="btn btn-ghost btn-sm" onclick="openChangePasswordModal()" id="sidebar-pw-btn" title="Change Password">🔑</button>
       <button class="btn btn-ghost btn-sm" onclick="logout()" id="sidebar-lock-btn">Lock</button>
     </div>
     <div style="padding:8px 16px;text-align:center;font-size:.62rem;color:hsl(218,12%,38%);letter-spacing:.03em;border-top:1px solid var(--border)" id="sidebar-poweredby">
@@ -1414,13 +1423,26 @@ input[type=range]::-moz-range-progress{background:hsl(40,74%,60%);height:6px;bor
 <!-- Scanner overlay -->
 <div id="scanner-overlay">
   <div style="position:relative;width:100%;max-width:360px">
-    <video id="scanner-video" autoplay playsinline muted></video>
+    <video id="scanner-video" autoplay playsinline muted style="border-radius:12px"></video>
     <div class="scan-line"></div>
+    <!-- Continuous scan toggle -->
+    <div style="position:absolute;top:10px;right:10px">
+      <button id="scanner-continuous-btn" onclick="toggleContinuousScan()" style="background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.3);border-radius:20px;color:#fff;font-size:.72rem;font-weight:600;padding:4px 10px;cursor:pointer">
+        🔁 Continuous: OFF
+      </button>
+    </div>
+    <!-- Torch toggle (if supported) -->
+    <div style="position:absolute;top:10px;left:10px">
+      <button onclick="toggleTorch()" id="torch-btn" style="display:none;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.3);border-radius:20px;color:#fff;font-size:.72rem;padding:4px 10px;cursor:pointer">
+        🔦 Flash
+      </button>
+    </div>
   </div>
-  <div id="scanner-hint" style="color:rgba(255,255,255,.6);font-size:.875rem">Point camera at barcode</div>
+  <div id="scanner-hint" style="color:rgba(255,255,255,.7);font-size:.82rem;text-align:center;padding:0 16px">Point camera at barcode</div>
+  <div id="scanner-context-label" style="color:hsl(40,74%,60%);font-size:.75rem;font-weight:600;text-align:center"></div>
   <div style="display:flex;gap:8px;width:100%;max-width:360px">
     <input id="scanner-manual-input" style="flex:1;padding:9px 12px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);border-radius:var(--radius);color:#fff;font-size:.875rem;font-family:inherit;outline:none" placeholder="Or type barcode…" onkeydown="if(event.key==='Enter')scanManual()"/>
-    <button class="btn btn-primary btn-sm" onclick="scanManual()">Add</button>
+    <button class="btn btn-primary btn-sm" onclick="scanManual()">Go</button>
   </div>
   <button class="btn btn-ghost btn-sm" onclick="closeScanner()" style="color:rgba(255,255,255,.6)">✕ Close</button>
 </div>
@@ -1626,7 +1648,7 @@ input[type=range]::-moz-range-progress{background:hsl(40,74%,60%);height:6px;bor
             <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;display:inline-block;vertical-align:-3px"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></span>
             <input id="rs-search" placeholder="Scan barcode or search product name…" oninput="rsSearch()" autocomplete="off"/>
           </div>
-          <button class="btn btn-outline btn-sm" id="rs-scan-btn" onclick="rsOpenScanner()" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;display:inline-block;vertical-align:-3px"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"/><circle cx="12" cy="13" r="3"/></svg> Scan</button>
+          <button onclick="openScannerContext('stock')" title="Scan barcode" style="flex-shrink:0;padding:0 10px;height:36px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted-fg);cursor:pointer;display:flex;align-items:center;gap:4px;font-size:.75rem;font-weight:600;transition:all .15s" onmouseover="this.style.borderColor='var(--primary)';this.style.color='var(--primary)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted-fg)'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><line x1="7" y1="12" x2="17" y2="12"/></svg>Scan</button>
           <button class="btn btn-outline btn-sm" onclick="rsAddManual()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;display:inline-block;vertical-align:-3px"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> New Item</button>
         </div>
         <div id="rs-results" style="display:none;border-bottom:1px solid var(--border);max-height:160px;overflow-y:auto"></div>
@@ -1789,7 +1811,17 @@ input[type=range]::-moz-range-progress{background:hsl(40,74%,60%);height:6px;bor
   <div class="modal">
     <div class="modal-hdr"><span class="modal-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;display:inline-block;vertical-align:-3px;margin-right:4px"><path d="M5 3h14v18l-3-2-2.5 2-2.5-2-2.5 2-2.5-2-3 2z"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>Receipt</span><button class="btn btn-ghost btn-icon" onclick="closeReceipt()">✕</button></div>
     <div class="modal-body" style="padding:12px 16px"><div class="receipt-paper" id="receipt-content"></div></div>
-    <div class="modal-ftr"><button class="btn btn-outline" onclick="closeReceipt()">Close</button><button class="btn btn-primary" onclick="printReceipt()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;display:inline-block;vertical-align:-3px"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Print</button></div>
+    <div class="modal-ftr" style="gap:6px">
+      <button class="btn btn-outline" onclick="closeReceipt()">Close</button>
+      <button class="btn btn-ghost" onclick="shareReceipt()" style="display:flex;align-items:center;gap:6px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        Share
+      </button>
+      <button class="btn btn-primary" onclick="printReceipt()" style="display:flex;align-items:center;gap:6px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        Print
+      </button>
+    </div>
   </div>
 </div>
 
@@ -1820,6 +1852,46 @@ input[type=range]::-moz-range-progress{background:hsl(40,74%,60%);height:6px;bor
       </button>
     </div>
   </div>
+</div>
+
+<!-- Change Password Modal -->
+<div id="change-pw-modal" style="display:none" class="modal-overlay" onclick="if(event.target===this)closeChangePasswordModal()">
+  <div class="modal" style="max-width:360px">
+    <div class="modal-hdr">
+      <span class="modal-title">Change Password</span>
+      <button class="btn btn-ghost btn-icon" onclick="closeChangePasswordModal()">✕</button>
+    </div>
+    <div class="modal-body" style="padding:16px 20px;display:flex;flex-direction:column;gap:12px">
+      <div class="form-group" style="margin:0">
+        <label class="form-label">Current Password</label>
+        <input class="form-input" id="cpw-current" type="password" placeholder="Enter current password"/>
+      </div>
+      <div class="form-group" style="margin:0">
+        <label class="form-label">New Password</label>
+        <input class="form-input" id="cpw-new" type="password" placeholder="Min 6 characters"/>
+      </div>
+      <div class="form-group" style="margin:0">
+        <label class="form-label">Confirm New Password</label>
+        <input class="form-input" id="cpw-confirm" type="password" placeholder="Repeat new password" onkeydown="if(event.key==='Enter')saveNewPassword()"/>
+      </div>
+      <div id="cpw-error" style="color:hsl(0,62%,60%);font-size:.78rem;min-height:16px"></div>
+    </div>
+    <div class="modal-ftr">
+      <button class="btn btn-ghost" onclick="closeChangePasswordModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveNewPassword()">Save Password</button>
+    </div>
+  </div>
+</div>
+
+<!-- PWA Install Banner -->
+<div id="pwa-install-banner" style="display:none;position:fixed;bottom:70px;left:12px;right:12px;background:var(--card);border:1px solid var(--primary);border-radius:12px;padding:12px 16px;align-items:center;gap:12px;z-index:999;box-shadow:0 4px 20px rgba(0,0,0,.3)">
+  <svg viewBox="0 0 24 24" fill="none" stroke="hsl(40,74%,60%)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:28px;height:28px;flex-shrink:0"><path d="M3 9.5 12 3l9 6.5"/><path d="M4 9.5V20a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9.5"/><path d="M9 21V12h6v9"/></svg>
+  <div style="flex:1">
+    <div style="font-size:.82rem;font-weight:600">Install Passage POS</div>
+    <div style="font-size:.72rem;color:var(--muted-fg)">Add to home screen for quick access</div>
+  </div>
+  <button onclick="installPWA()" class="btn btn-primary" style="padding:6px 14px;font-size:.78rem;flex-shrink:0">Install</button>
+  <button onclick="dismissPWABanner()" style="background:none;border:none;color:var(--muted-fg);cursor:pointer;font-size:1rem;padding:4px;flex-shrink:0">✕</button>
 </div>
 
 <!-- Held Orders Modal -->
@@ -3234,9 +3306,10 @@ function doLogin() {
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (!reduced) {
       ls.classList.add('fading-out');
-      setTimeout(() => { ls.style.display = 'none'; ls.classList.remove('fading-out'); launchApp(user.role); }, 280);
+      setTimeout(() => { ls.style.display = 'none'; ls.classList.remove('fading-out'); CURRENT_ROLE_USERNAME = LOGIN_SELECTED_USER; launchApp(user.role); }, 280);
     } else {
       ls.style.display = 'none';
+      CURRENT_ROLE_USERNAME = LOGIN_SELECTED_USER;
       launchApp(user.role);
     }
   } else {
@@ -5255,8 +5328,7 @@ function stopCamera() {
 function initBarcodeDetection(video) {
   const hint = document.getElementById('scanner-hint');
   if (!('BarcodeDetector' in window)) {
-    // No native support — manual input below the camera remains the way to add items.
-    if (hint) hint.textContent = 'Auto-scan not supported on this browser — type the barcode below';
+    if (hint) hint.textContent = 'Auto-scan not available on this browser — type barcode below, or try Chrome on Android';
     return;
   }
   try {
@@ -5267,7 +5339,7 @@ function initBarcodeDetection(video) {
     if (hint) hint.textContent = 'Auto-scan not supported on this browser — type the barcode below';
     return;
   }
-  if (hint) hint.textContent = 'Point camera at barcode';
+  if (hint) hint.textContent = 'Point camera at barcode or QR code';
 
   const scanFrame = async () => {
     if (!SCANNER_STREAM) return; // camera was stopped
@@ -5328,6 +5400,47 @@ function scanManual() {
     document.getElementById('scanner-manual-input').focus();
   } else {
     toast(`Barcode "${val}" not found`, 'error');
+  }
+}
+
+
+function buildReceiptText(sale) {
+  const customer = sale.customerId ? APP.data.customers.find(c => c.id === sale.customerId) : null;
+  const dateStr = new Date(sale.date).toLocaleString('en-GB', {day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+  const lines = [];
+  lines.push('[ ' + APP.config.shopName + ' ]');
+  if (APP.config.shopAddress) lines.push(APP.config.shopAddress);
+  if (APP.config.shopPhone)   lines.push(APP.config.shopPhone);
+  lines.push('');
+  lines.push('Receipt #' + sale.id);
+  lines.push(dateStr);
+  if (customer) lines.push('Customer: ' + customer.name);
+  lines.push('------------------');
+  sale.items.forEach(i => lines.push(i.name + ' x' + i.qty + '   ' + fmt(i.unitPrice * i.qty)));
+  lines.push('------------------');
+  if (sale.discountAmount > 0) lines.push('Discount: -' + fmt(sale.discountAmount));
+  if (sale.taxAmount > 0)      lines.push('Tax: ' + fmt(sale.taxAmount));
+  lines.push('TOTAL: ' + fmt(sale.totalDue));
+  lines.push('Payment: ' + sale.paymentMethod);
+  if (sale.status === 'pending') lines.push('STATUS: PENDING');
+  lines.push('');
+  lines.push(APP.config.receiptFooter ? APP.config.receiptFooter.replace(/<[^>]*>/g,'') : 'Thank you!');
+  return lines.join('\n');
+}
+
+async function shareReceipt() {
+  const sale = _currentReceiptSale;
+  if (!sale) return;
+  const text = buildReceiptText(sale);
+  if (navigator.share) {
+    try { await navigator.share({ title: 'Receipt - ' + APP.config.shopName, text }); return; }
+    catch(e) { if (e.name === 'AbortError') return; }
+  }
+  try {
+    await navigator.clipboard.writeText(text);
+    toast('Receipt copied - paste into Viber, Telegram or any app', 'success');
+  } catch(e) {
+    window.open('viber://forward?text=' + encodeURIComponent(text), '_blank');
   }
 }
 
@@ -5733,11 +5846,12 @@ function renderInventory() {
           <button class="btn btn-primary" onclick="openItemModal(null)">${t('inv_addProduct')}</button>
         </div>
       </div>
-      <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap">
+      <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center">
         <div class="sw-bar" style="flex:1;min-width:200px">
           <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;display:inline-block;vertical-align:-3px"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg></span>
           <input id="inv-search" placeholder="${t('inv_searchProducts')}" value="${INV_SEARCH}" oninput="_debouncedRenderInventory()" autocomplete="off"/>
         </div>
+        <button onclick="openScannerContext('inventory')" title="Scan barcode" style="flex-shrink:0;padding:0 10px;height:36px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted-fg);cursor:pointer;display:flex;align-items:center;gap:4px;font-size:.75rem;font-weight:600;transition:all .15s" onmouseover="this.style.borderColor='var(--primary)';this.style.color='var(--primary)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted-fg)'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><line x1="7" y1="12" x2="17" y2="12"/></svg>Scan</button>
       </div>
       <div class="cat-pills" style="margin-bottom:16px">
         ${cats.map(c=>`<button class="cat-pill ${INV_CAT===c?'active':''}" onclick="INV_CAT='${c}';INV_COLLAPSED={};INV_PAGE=0;renderInventory()">${c==='all'?t('inv_all'):c}</button>`).join('')}
@@ -5796,7 +5910,7 @@ function openItemModal(itemId) {
       <div class="form-group" style="margin-bottom:0"><label class="form-label">${t('inv_costPrice')} (${APP.config.currency})</label><input class="form-input" id="i-cost" type="number" value="${item.costPrice||''}" placeholder="0" min="0"/></div>
       <div class="form-group" style="margin-bottom:0"><label class="form-label">${t('inv_sellPrice')} (${APP.config.currency}) *</label><input class="form-input" id="i-price" type="number" value="${item.price||''}" placeholder="0" min="0"/></div>
       <div class="form-group" style="margin-bottom:0"><label class="form-label">${t('inv_stockQty')}</label><input class="form-input" id="i-qty" type="number" value="${item.qty??''}" placeholder="0" min="0"/></div>
-      <div class="form-group" style="margin-bottom:0"><label class="form-label">${t('inv_barcode')}</label><input class="form-input" id="i-barcode" value="${item.barcode||''}" placeholder="${t('inv_optional')}"/></div>
+      <div class="form-group" style="margin-bottom:0"><label class="form-label">${t('inv_barcode')}</label><div style="display:flex;gap:6px"><input class="form-input" id="i-barcode" value="${item.barcode||''}" placeholder="${t('inv_optional')}" style="flex:1"/><button onclick="openScannerContext('barcode')" title="Scan barcode" style="flex-shrink:0;padding:0 10px;height:36px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted-fg);cursor:pointer;display:flex;align-items:center;gap:4px;font-size:.75rem;font-weight:600;transition:all .15s" onmouseover="this.style.borderColor='var(--primary)';this.style.color='var(--primary)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted-fg)'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><line x1="7" y1="12" x2="17" y2="12"/></svg>Scan</button></div></div>
       <div class="form-group" style="grid-column:span 2;margin-bottom:0">
         <label class="form-label">${t('inv_photoUrl')}</label>
         <div style="display:flex;align-items:center;gap:10px">
@@ -7388,6 +7502,10 @@ function globalScanAdd(barcode) {
 }
 
 (async function boot() {
+  // Register service worker for PWA
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js').catch(e => console.warn('SW:', e));
+  }
   // Show loading overlay while fetching from Supabase
   const loadEl = document.getElementById('boot-loading');
   if (loadEl) loadEl.style.display = 'flex';
@@ -8132,24 +8250,24 @@ function getPlanLimits() {
 /* ── EMAIL via Resend ── */
 async function sendEmail(to, subject, html) {
   try {
-    const res = await fetch('https://api.resend.com/emails', {
+    // Route through Supabase Edge Function to avoid CORS
+    const res = await fetch('https://ycubwvjdyxqiauryhzdo.supabase.co/functions/v1/send-email', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + RESEND_API_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_ANON,
       },
-      body: JSON.stringify({
-        from: 'Passage POS <onboarding@resend.dev>',
-        to: [to],
-        subject,
-        html,
-      }),
+      body: JSON.stringify({ to, subject, html }),
     });
     const data = await res.json();
-    if (!res.ok) console.warn('[Email] Failed:', data);
+    if (!res.ok) {
+      console.warn('[Email] Failed to ' + to + ':', JSON.stringify(data));
+    } else {
+      console.log('[Email] Sent to ' + to + ': ' + subject);
+    }
     return res.ok;
   } catch(e) {
-    console.warn('[Email] Error:', e);
+    console.warn('[Email] Network error:', e.message);
     return false;
   }
 }
@@ -8259,10 +8377,13 @@ async function submitRegistration() {
 
     if (error) throw error;
 
-    // Send owner notification
-    await emailRequestNotification(req);
+    // Send owner notification (best effort — free Resend tier may limit recipients)
+    const emailSent = await emailRequestNotification(req);
+    if (!emailSent) {
+      console.warn('[Email] Owner notification failed — check Resend dashboard or verify domain at resend.com/domains');
+    }
 
-    // Show success screen
+    // Show success screen regardless of email status
     document.getElementById('registration-screen').style.display = 'none';
     showRegistrationSuccess(ownerName, email);
 
@@ -8520,6 +8641,358 @@ async function toggleShopStatus(shopId, currentStatus) {
   await sb.from('shops').update({ status: newStatus }).eq('id', shopId);
   toast('Shop ' + newStatus, 'success');
   renderOwnerDashboard();
+}
+
+
+/* ================================================================
+   NEW FEATURES: WhatsApp Receipt, Change Password, PWA install prompt
+   ================================================================ */
+
+/* ── WhatsApp Receipt Sharing ── */
+let _currentReceiptSale = null;
+
+const _origShowReceipt = window.showReceipt;
+
+function showReceipt(sale) {
+  _currentReceiptSale = sale;
+  // Call original
+  const customer = sale.customerId ? APP.data.customers.find(c => c.id === sale.customerId) : null;
+  const dateStr = new Date(sale.date).toLocaleString('en-GB', {
+    day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'
+  });
+  const html = `
+    <div style="text-align:center;margin-bottom:10px">
+      <div style="font-size:16px;font-weight:700">${APP.config.shopIcon && !APP.config.shopIcon.startsWith('<') ? APP.config.shopIcon + ' ' : ''}${APP.config.shopName}</div>
+      ${APP.config.shopAddress ? `<div style="font-size:10px;color:#666">${APP.config.shopAddress}</div>` : ''}
+      ${APP.config.shopPhone ? `<div style="font-size:10px;color:#666">${APP.config.shopPhone}</div>` : ''}
+      <div style="font-size:10px;color:#666;margin-top:4px">${dateStr}</div>
+      <div style="font-size:10px;color:#666">Receipt #${sale.id}</div>
+    </div>
+    <hr class="rcpt-div">
+    ${sale.items.map(i => `
+      <div class="rcpt-row">
+        <span>${i.name} ×${i.qty}</span>
+        <span>${fmt(i.unitPrice * i.qty)}</span>
+      </div>
+    `).join('')}
+    <hr class="rcpt-div">
+    <div class="rcpt-row"><span>Subtotal</span><span>${fmt(sale.subtotal)}</span></div>
+    ${sale.taxAmount > 0 ? `<div class="rcpt-row"><span>Tax (${sale.taxRate}%)</span><span>${fmt(sale.taxAmount)}</span></div>` : ''}
+    ${sale.discountAmount > 0 ? `<div class="rcpt-row"><span>Discount</span><span>−${fmt(sale.discountAmount)}</span></div>` : ''}
+    <hr class="rcpt-div">
+    <div class="rcpt-row rcpt-total"><span>TOTAL</span><span>${fmt(sale.totalDue)}</span></div>
+    <div class="rcpt-row" style="margin-top:4px"><span>Payment</span><span style="text-transform:capitalize">${sale.paymentMethod}</span></div>
+    ${sale.status === 'pending' ? `<div class="rcpt-row" style="color:var(--warning);font-weight:700"><span>STATUS</span><span>PENDING</span></div>` : ''}
+    ${customer ? `<div class="rcpt-row"><span>Customer</span><span>${customer.name}</span></div>` : ''}
+    <hr class="rcpt-div">
+    <div style="text-align:center;font-size:10px;color:#666;margin-top:6px">${APP.config.receiptFooter}</div>
+  `;
+  document.getElementById('receipt-content').innerHTML = html;
+  document.getElementById('receipt-modal').style.display = 'flex';
+  document.getElementById('print-area').innerHTML = html;
+}
+
+function shareReceiptWhatsApp() {
+  const sale = _currentReceiptSale;
+  if (!sale) return;
+  const customer = sale.customerId ? APP.data.customers.find(c => c.id === sale.customerId) : null;
+  const dateStr = new Date(sale.date).toLocaleString('en-GB', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
+
+  // Build plain text receipt for WhatsApp
+  const lines = [];
+  lines.push('🧾 *' + APP.config.shopName + '*');
+  if (APP.config.shopAddress) lines.push('📍 ' + APP.config.shopAddress);
+  if (APP.config.shopPhone)   lines.push('📞 ' + APP.config.shopPhone);
+  lines.push('');
+  lines.push('Receipt #' + sale.id);
+  lines.push('📅 ' + dateStr);
+  if (customer) lines.push('👤 ' + customer.name);
+  lines.push('');
+  lines.push('─────────────────');
+  sale.items.forEach(i => {
+    const total = fmt(i.unitPrice * i.qty);
+    lines.push(i.name + ' ×' + i.qty + '  →  ' + total);
+  });
+  lines.push('─────────────────');
+  if (sale.discountAmount > 0) lines.push('Discount: −' + fmt(sale.discountAmount));
+  if (sale.taxAmount > 0)      lines.push('Tax: ' + fmt(sale.taxAmount));
+  lines.push('*TOTAL: ' + fmt(sale.totalDue) + '*');
+  lines.push('Payment: ' + sale.paymentMethod);
+  if (sale.status === 'pending') lines.push('⚠️ STATUS: PENDING');
+  lines.push('');
+  lines.push(APP.config.receiptFooter ? APP.config.receiptFooter.replace(/<[^>]*>/g,'') : 'Thank you!');
+
+  const text = encodeURIComponent(lines.join('\n'));
+  window.open('https://wa.me/?text=' + text, '_blank');
+}
+
+/* ── Change Password ── */
+function openChangePasswordModal() {
+  const modal = document.getElementById('change-pw-modal');
+  if (!modal) return;
+  document.getElementById('cpw-current').value = '';
+  document.getElementById('cpw-new').value = '';
+  document.getElementById('cpw-confirm').value = '';
+  document.getElementById('cpw-error').textContent = '';
+  modal.style.display = 'flex';
+}
+
+function closeChangePasswordModal() {
+  document.getElementById('change-pw-modal').style.display = 'none';
+}
+
+async function saveNewPassword() {
+  const currentPw = document.getElementById('cpw-current').value;
+  const newPw     = document.getElementById('cpw-new').value;
+  const confirmPw = document.getElementById('cpw-confirm').value;
+  const errEl     = document.getElementById('cpw-error');
+
+  // Validate current password
+  const users = APP.config.users || [];
+  const userIdx = users.findIndex(u => u.username === CURRENT_ROLE_USERNAME && u.password === currentPw);
+  if (userIdx === -1) { errEl.textContent = 'Current password is incorrect.'; return; }
+  if (newPw.length < 6) { errEl.textContent = 'New password must be at least 6 characters.'; return; }
+  if (newPw !== confirmPw) { errEl.textContent = 'Passwords do not match.'; return; }
+
+  // Update password
+  const updatedUsers = users.map((u, i) => i === userIdx ? { ...u, password: newPw } : u);
+  updateConfig({ users: updatedUsers });
+  await saveConfig();
+
+  closeChangePasswordModal();
+  toast('Password changed successfully', 'success');
+}
+
+/* ── PWA Install Prompt ── */
+let _pwaInstallPrompt = null;
+
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  _pwaInstallPrompt = e;
+  // Show install banner after 30 seconds if not already installed
+  setTimeout(() => {
+    if (_pwaInstallPrompt) showPWAInstallBanner();
+  }, 30000);
+});
+
+function showPWAInstallBanner() {
+  if (localStorage.getItem('pwa_dismissed')) return;
+  const banner = document.getElementById('pwa-install-banner');
+  if (banner) banner.style.display = 'flex';
+}
+
+async function installPWA() {
+  if (!_pwaInstallPrompt) return;
+  _pwaInstallPrompt.prompt();
+  const { outcome } = await _pwaInstallPrompt.userChoice;
+  _pwaInstallPrompt = null;
+  document.getElementById('pwa-install-banner').style.display = 'none';
+  if (outcome === 'accepted') toast('App installed! Find it on your home screen.', 'success');
+}
+
+function dismissPWABanner() {
+  localStorage.setItem('pwa_dismissed', '1');
+  document.getElementById('pwa-install-banner').style.display = 'none';
+}
+
+// Track current logged-in username for password change
+let CURRENT_ROLE_USERNAME = '';
+
+
+/* ================================================================
+   CAMERA SCANNER UPGRADE
+   Context-aware scanning + continuous mode + torch + iOS fallback
+   ================================================================ */
+
+let SCANNER_CONTEXT  = 'sales';   // 'sales' | 'inventory' | 'stock' | 'barcode'
+let SCANNER_CONTINUOUS = false;
+let SCANNER_TORCH    = false;
+
+/* ── Open scanner with context ── */
+function openScannerContext(ctx) {
+  SCANNER_CONTEXT = ctx || 'sales';
+
+  // Update context label
+  const labels = {
+    sales:     'Adding to cart',
+    inventory: 'Find product',
+    stock:     'Add to receive list',
+    barcode:   'Scan barcode for product',
+  };
+  const el = document.getElementById('scanner-context-label');
+  if (el) el.textContent = labels[SCANNER_CONTEXT] || '';
+
+  // Reset continuous mode
+  SCANNER_CONTINUOUS = false;
+  updateContinuousBtn();
+
+  const overlay = document.getElementById('scanner-overlay');
+  overlay.classList.add('open');
+  document.getElementById('scanner-manual-input').value = '';
+  startCamera();
+}
+
+/* ── Continuous scan toggle ── */
+function toggleContinuousScan() {
+  SCANNER_CONTINUOUS = !SCANNER_CONTINUOUS;
+  updateContinuousBtn();
+  if (SCANNER_CONTINUOUS) {
+    toast('Continuous scan ON — keep pointing at products', 'success');
+  }
+}
+
+function updateContinuousBtn() {
+  const btn = document.getElementById('scanner-continuous-btn');
+  if (!btn) return;
+  btn.textContent  = '\uD83D\uDD01 Continuous: ' + (SCANNER_CONTINUOUS ? 'ON' : 'OFF');
+  btn.style.background = SCANNER_CONTINUOUS ? 'hsla(160,55%,45%,.7)' : 'rgba(0,0,0,.5)';
+  btn.style.borderColor = SCANNER_CONTINUOUS ? 'hsl(160,55%,55%)' : 'rgba(255,255,255,.3)';
+}
+
+/* ── Torch / flashlight ── */
+async function toggleTorch() {
+  if (!SCANNER_STREAM) return;
+  const track = SCANNER_STREAM.getVideoTracks()[0];
+  if (!track || !track.getCapabilities?.()?.torch) return;
+  SCANNER_TORCH = !SCANNER_TORCH;
+  await track.applyConstraints({ advanced: [{ torch: SCANNER_TORCH }] });
+  const btn = document.getElementById('torch-btn');
+  if (btn) btn.textContent = SCANNER_TORCH ? '\uD83D\uDD26 Flash: ON' : '\uD83D\uDD26 Flash';
+}
+
+/* ── Enhanced startCamera — show torch button if supported ── */
+const _origStartCamera = window.startCamera;
+function startCamera() {
+  if (!navigator.mediaDevices?.getUserMedia) {
+    toast('Camera not available — type barcode below', 'error');
+    return;
+  }
+  navigator.mediaDevices.getUserMedia({
+    video: {
+      facingMode: 'environment',
+      width: { ideal: 1280 },
+      height: { ideal: 720 },
+    }
+  })
+  .then(stream => {
+    SCANNER_STREAM = stream;
+    const video = document.getElementById('scanner-video');
+    video.srcObject = stream;
+    video.play?.();
+    // Show torch button if device supports it
+    const track = stream.getVideoTracks()[0];
+    const caps  = track?.getCapabilities?.();
+    const torchBtn = document.getElementById('torch-btn');
+    if (torchBtn && caps?.torch) torchBtn.style.display = 'block';
+    initBarcodeDetection(video);
+  })
+  .catch(err => {
+    console.warn('[Scanner] Camera error:', err);
+    const hint = document.getElementById('scanner-hint');
+    if (hint) hint.textContent = 'Camera access denied — type barcode below';
+    toast('Camera not available — use manual input', 'error');
+  });
+}
+
+/* ── Context-aware barcode handler (overrides original) ── */
+function handleScannedBarcode(value) {
+  const v = value.trim();
+  if (!v) return;
+
+  if (SCANNER_CONTEXT === 'barcode') {
+    // Fill barcode field in item modal
+    const field = document.getElementById('i-barcode');
+    if (field) {
+      field.value = v;
+      closeScanner();
+      toast('Barcode scanned: ' + v, 'success');
+    }
+    return;
+  }
+
+  if (SCANNER_CONTEXT === 'inventory') {
+    // Find product and open edit modal
+    const item = APP.data.items.find(i => i.barcode && i.barcode.trim().toLowerCase() === v.toLowerCase());
+    if (item) {
+      closeScanner();
+      openItemModal(item.id);
+      if (navigator.vibrate) navigator.vibrate(80);
+    } else {
+      toast('Barcode "' + v + '" not found — try adding it', 'error');
+      if (navigator.vibrate) navigator.vibrate([60,40,60]);
+    }
+    return;
+  }
+
+  if (SCANNER_CONTEXT === 'stock') {
+    // Add to receive stock batch
+    const item = APP.data.items.find(i => i.barcode && i.barcode.trim().toLowerCase() === v.toLowerCase());
+    if (item) {
+      // Use existing rs search to add item
+      const searchEl = document.getElementById('rs-search');
+      if (searchEl) { searchEl.value = item.name; rsSearch(); }
+      // Add to batch after short delay
+      setTimeout(() => {
+        const results = document.querySelectorAll('.rs-result-item');
+        if (results.length === 1) results[0].click();
+      }, 200);
+      if (!SCANNER_CONTINUOUS) closeScanner();
+      if (navigator.vibrate) navigator.vibrate(80);
+      flashScannerSuccess();
+    } else {
+      toast('Barcode "' + v + '" not in inventory', 'error');
+      if (navigator.vibrate) navigator.vibrate([60,40,60]);
+    }
+    return;
+  }
+
+  // Default: sales — add to cart
+  const item = APP.data.items.find(i => i.barcode && i.barcode.trim().toLowerCase() === v.toLowerCase());
+  if (item) {
+    addToCart(item.id);
+    toast(item.name + ' added \u2713', 'success');
+    if (navigator.vibrate) navigator.vibrate(80);
+    flashScannerSuccess();
+    // In continuous mode keep scanner open; in single mode close
+    if (!SCANNER_CONTINUOUS) {
+      setTimeout(closeScanner, 600);
+    }
+  } else {
+    toast('Barcode "' + v + '" not found', 'error');
+    if (navigator.vibrate) navigator.vibrate([60,40,60]);
+  }
+}
+
+/* ── iOS fallback: if BarcodeDetector not available, use input[capture] ── */
+function openScannerIosFallback() {
+  // Create a hidden file input that opens camera
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/*';
+  input.capture = 'environment';
+  input.style.display = 'none';
+  input.onchange = async e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    toast('Image captured — auto-scan not supported in this browser. Type barcode manually.', 'error');
+    document.body.removeChild(input);
+  };
+  document.body.appendChild(input);
+  input.click();
+}
+
+/* ── Update scanManual to be context-aware too ── */
+function scanManual() {
+  const val = document.getElementById('scanner-manual-input').value.trim();
+  if (!val) return;
+  handleScannedBarcode(val);
+  document.getElementById('scanner-manual-input').value = '';
+  document.getElementById('scanner-manual-input').focus();
+}
+
+/* ── Update the scan button in the POS header to use context ── */
+function openSalesScanner() {
+  openScannerContext('sales');
 }
 
 /* ================================================================
