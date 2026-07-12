@@ -8132,26 +8132,18 @@ function getPlanLimits() {
 /* ── EMAIL via Resend ── */
 async function sendEmail(to, subject, html) {
   try {
-    const res = await fetch('https://api.resend.com/emails', {
+    // Route through Supabase Edge Function to avoid CORS
+    const res = await fetch('https://ycubwvjdyxqiauryhzdo.supabase.co/functions/v1/send-email', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + RESEND_API_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_ANON,
       },
-      body: JSON.stringify({
-        from: 'Passage POS <onboarding@resend.dev>',
-        to: [to],
-        subject,
-        html,
-      }),
+      body: JSON.stringify({ to, subject, html }),
     });
     const data = await res.json();
     if (!res.ok) {
       console.warn('[Email] Failed to ' + to + ':', JSON.stringify(data));
-      // On free tier, can only send to verified email — log details clearly
-      if (data.statusCode === 403 || data.name === 'validation_error') {
-        console.warn('[Email] Resend free tier: can only send to thehannibal82@gmail.com until a domain is verified at resend.com/domains');
-      }
     } else {
       console.log('[Email] Sent to ' + to + ': ' + subject);
     }
