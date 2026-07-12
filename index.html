@@ -1185,6 +1185,121 @@ input[type=range]::-moz-range-progress{background:hsl(40,74%,60%);height:6px;bor
 </div>
 
 <!-- ══ LOGIN SCREEN ══ -->
+<!-- ══ SHOP CODE LOGIN SCREEN ══ -->
+<div class="pos-screen" id="shop-code-screen" style="display:none;align-items:center;justify-content:center;padding:24px 16px">
+  <div class="lv2-wrap" style="width:100%;max-width:360px">
+    <div style="text-align:center;margin-bottom:28px">
+      <svg viewBox="0 0 24 24" fill="none" stroke="hsl(40,74%,60%)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:40px;height:40px;margin-bottom:12px"><path d="M3 9.5 12 3l9 6.5"/><path d="M4 9.5V20a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V9.5"/><path d="M9 21V12h6v9"/></svg>
+      <div style="font-size:1.4rem;font-weight:700;letter-spacing:-.02em">Passage POS</div>
+      <div style="font-size:.82rem;color:var(--muted-fg);margin-top:4px">Enter your Shop ID to continue</div>
+    </div>
+    <div class="form-group" style="margin-bottom:16px">
+      <label class="form-label">Shop ID</label>
+      <input class="form-input" id="shop-code-input" type="text" placeholder="e.g. POS-A3F9" autocomplete="off"
+        style="text-align:center;font-size:1.3rem;font-weight:700;letter-spacing:3px;font-family:var(--font-mono)"
+        oninput="this.value=this.value.toUpperCase()" onkeydown="if(event.key==='Enter')lookupShopCode()"/>
+    </div>
+    <div id="shop-code-error" style="color:hsl(0,62%,60%);font-size:.78rem;margin-bottom:12px;min-height:18px;text-align:center"></div>
+    <button id="shop-code-btn" class="btn btn-primary" onclick="lookupShopCode()" style="width:100%;justify-content:center;padding:10px">Find My Shop</button>
+    <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);text-align:center">
+      <div style="font-size:.75rem;color:var(--muted-fg);margin-bottom:8px">New to Passage POS?</div>
+      <button onclick="showRegistration()" style="background:none;border:1px solid var(--border);border-radius:8px;color:var(--fg);cursor:pointer;font-size:.8rem;padding:6px 16px;width:100%">Request Access</button>
+    </div>
+    <div style="display:flex;justify-content:center;gap:6px;margin-top:16px">
+      <button onclick="toggleLoginTheme()" style="width:28px;height:28px;border-radius:50%;border:1px solid var(--border);background:transparent;color:var(--muted-fg);cursor:pointer;display:inline-flex;align-items:center;justify-content:center">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+      <button onclick="toggleLoginLang()" style="width:28px;height:28px;border-radius:50%;border:1px solid var(--border);background:transparent;color:var(--muted-fg);cursor:pointer;font-size:.6rem;font-weight:700;letter-spacing:-.3px">EN</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ REGISTRATION SCREEN ══ -->
+<div class="pos-screen" id="registration-screen" style="display:none;align-items:center;justify-content:center;padding:24px 16px;overflow-y:auto">
+  <div class="lv2-wrap" style="width:100%;max-width:400px">
+    <div style="margin-bottom:20px">
+      <button onclick="showShopCodeScreen()" style="background:none;border:none;color:var(--muted-fg);cursor:pointer;font-size:.8rem;display:flex;align-items:center;gap:4px;padding:0;margin-bottom:12px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M19 12H5M12 5l-7 7 7 7"/></svg> Back
+      </button>
+      <div style="font-size:1.3rem;font-weight:700">Request Access</div>
+      <div style="font-size:.8rem;color:var(--muted-fg);margin-top:3px">We'll review your request and email you within 24 hours</div>
+    </div>
+    <div class="form-group" style="margin-bottom:10px">
+      <label class="form-label">Shop Name *</label>
+      <input class="form-input" id="reg-shop-name" placeholder="e.g. Kyaw's Grocery Store"/>
+    </div>
+    <div class="form-group" style="margin-bottom:10px">
+      <label class="form-label">Your Name *</label>
+      <input class="form-input" id="reg-owner-name" placeholder="Your full name"/>
+    </div>
+    <div class="form-group" style="margin-bottom:10px">
+      <label class="form-label">Email Address *</label>
+      <input class="form-input" id="reg-email" type="email" placeholder="your@email.com"/>
+    </div>
+    <div class="form-group" style="margin-bottom:10px">
+      <label class="form-label">Phone Number</label>
+      <input class="form-input" id="reg-phone" placeholder="09-xxx-xxxxx"/>
+    </div>
+    <div class="form-group" style="margin-bottom:14px">
+      <label class="form-label">Business Type</label>
+      <select class="form-input" id="reg-biz-type">
+        <option value="general">General Shop</option>
+        <option value="grocery">Grocery / Convenience</option>
+        <option value="phone">Mobile Phone Shop</option>
+        <option value="pharmacy">Pharmacy</option>
+        <option value="laundry">Laundromat</option>
+        <option value="restaurant">Restaurant / Food</option>
+      </select>
+    </div>
+    <div class="form-group" style="margin-bottom:16px">
+      <label class="form-label">Plan</label>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px">
+        <label style="cursor:pointer">
+          <input type="radio" name="reg-plan" value="free" checked style="display:none" id="reg-plan-free"/>
+          <div id="reg-plan-free-card" onclick="selectPlanCard('free')" style="border:2px solid var(--primary);border-radius:8px;padding:10px 12px;background:hsla(40,74%,60%,.08)">
+            <div style="font-weight:700;font-size:.9rem">Free</div>
+            <div style="font-size:.7rem;color:var(--muted-fg);margin-top:2px">50 products · 2 users</div>
+          </div>
+        </label>
+        <label style="cursor:pointer">
+          <input type="radio" name="reg-plan" value="pro" style="display:none" id="reg-plan-pro"/>
+          <div id="reg-plan-pro-card" onclick="selectPlanCard('pro')" style="border:2px solid var(--border);border-radius:8px;padding:10px 12px">
+            <div style="font-weight:700;font-size:.9rem">Pro ⭐</div>
+            <div style="font-size:.7rem;color:var(--muted-fg);margin-top:2px">Unlimited · 10 users</div>
+          </div>
+        </label>
+      </div>
+    </div>
+    <div id="reg-error" style="color:hsl(0,62%,60%);font-size:.78rem;margin-bottom:10px;min-height:18px"></div>
+    <button id="reg-submit-btn" class="btn btn-primary" onclick="submitRegistration()" style="width:100%;justify-content:center;padding:10px">Request Access</button>
+  </div>
+</div>
+
+<!-- ══ REGISTRATION SUCCESS ══ -->
+<div class="pos-screen" id="reg-success-screen" style="display:none;align-items:center;justify-content:center;padding:24px 16px">
+  <div class="lv2-wrap" style="width:100%;max-width:360px;text-align:center">
+    <svg viewBox="0 0 24 24" fill="none" stroke="hsl(160,55%,55%)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:56px;height:56px;margin-bottom:16px"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+    <h2 style="font-size:1.3rem;font-weight:700;margin:0 0 8px">Request Submitted!</h2>
+    <p style="font-size:.875rem;color:var(--muted-fg);margin:0 0 6px">Thanks, <strong id="reg-success-name"></strong>!</p>
+    <p style="font-size:.875rem;color:var(--muted-fg);margin:0 0 20px">We'll review your request and email you at <strong id="reg-success-email"></strong> within 24 hours with your Shop ID.</p>
+    <button onclick="showShopCodeScreen()" class="btn btn-primary" style="justify-content:center;width:100%;padding:10px">Already have a Shop ID? Sign In</button>
+  </div>
+</div>
+
+<!-- ══ OWNER DASHBOARD ══ -->
+<div class="pos-screen" id="owner-dashboard-screen" style="display:none;overflow-y:auto">
+  <div style="background:var(--card);border-bottom:1px solid var(--border);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10">
+    <div style="font-size:.9rem;font-weight:700;color:var(--primary)">⚡ Owner Dashboard</div>
+    <div style="display:flex;gap:8px">
+      <button onclick="renderOwnerDashboard()" style="padding:5px 12px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted-fg);font-size:.75rem;cursor:pointer">↻ Refresh</button>
+      <button onclick="toggleLoginTheme()" style="width:28px;height:28px;border-radius:50%;border:1px solid var(--border);background:transparent;color:var(--muted-fg);cursor:pointer;display:inline-flex;align-items:center;justify-content:center">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+  </div>
+  <div id="owner-dashboard-content"></div>
+</div>
+
 <div class="pos-screen" id="login-screen">
   <div class="lv2-wrap">
 
@@ -2166,8 +2281,11 @@ async function syncFromSupabase() {
     // Load shop config
     const shop = await dbQuery('shops', sb.from('shops').select('*').eq('id', SHOP_ID).single());
     if (shop) {
+      CURRENT_PLAN = shop.plan || 'free';
       APP.config = {
         ...DEFAULT_CONFIG,
+        plan:               shop.plan || 'free',
+        shopStatus:         shop.status || 'active',
         shopName:           shop.shop_name,
         currency:           shop.currency,
         taxRate:            shop.tax_rate,
@@ -3012,6 +3130,41 @@ function _showLoginScreen() {
 
 function showLogin() { _showLoginScreen(); }
 
+function showShopCodeScreen() {
+  document.querySelectorAll('.pos-screen').forEach(s => s.style.display = 'none');
+  const el = document.getElementById('shop-code-screen');
+  if (el) { el.style.display = 'flex'; setTimeout(() => document.getElementById('shop-code-input')?.focus(), 100); }
+}
+
+function showRegistration() {
+  document.querySelectorAll('.pos-screen').forEach(s => s.style.display = 'none');
+  document.getElementById('registration-screen').style.display = 'flex';
+  setTimeout(() => document.getElementById('reg-shop-name')?.focus(), 100);
+}
+
+function showOwnerDashboard() {
+  document.querySelectorAll('.pos-screen').forEach(s => s.style.display = 'none');
+  const el = document.getElementById('owner-dashboard-screen');
+  if (el) { el.style.display = 'flex'; renderOwnerDashboard(); }
+}
+
+function selectPlanCard(plan) {
+  document.getElementById('reg-plan-' + plan).checked = true;
+  ['free','pro'].forEach(p => {
+    const card = document.getElementById('reg-plan-' + p + '-card');
+    if (card) {
+      card.style.borderColor = p === plan ? 'var(--primary)' : 'var(--border)';
+      card.style.background  = p === plan ? 'hsla(40,74%,60%,.08)' : 'transparent';
+    }
+  });
+}
+
+function showWizardFromFinder() {
+  document.querySelectorAll('.pos-screen').forEach(s => s.style.display = 'none');
+  document.getElementById('wizard-screen').style.display = 'flex';
+  initWizard();
+}
+
 let LOGIN_SELECTED_USER = null;
 
 function selectLoginUser(username) {
@@ -3071,6 +3224,11 @@ function doLogin() {
   const users = APP.config.users || [];
   const user = users.find(u => u.username === LOGIN_SELECTED_USER && u.password === password);
   if (user) {
+    // Check if shop is suspended
+    if (APP.config.shopStatus === 'suspended') {
+      errEl.textContent = 'This shop has been suspended. Contact Intercontinental Passage for support.';
+      return;
+    }
     errEl.textContent = '';
     const ls = document.getElementById('login-screen');
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -5619,6 +5777,8 @@ function getFilteredItems() {
 }
 
 function openItemModal(itemId) {
+  // Check plan limit when adding new item
+  if (!itemId && !checkPlanLimit('items')) return;
   INV_EDIT = itemId ? APP.data.items.find(i => i.id === itemId) : null;
   const cats = APP.config.categories || ['Other'];
   const modal = document.getElementById('item-modal');
@@ -7240,13 +7400,26 @@ function globalScanAdd(barcode) {
   document.querySelectorAll('.pos-screen').forEach(s => s.style.display = 'none');
   document.getElementById('app-shell').style.display = 'none';
 
-  if (!APP.config.wizardComplete) {
-    document.getElementById('wizard-screen').style.display = 'flex';
-    initWizard();
-  } else {
+  // Check if owner dashboard requested
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('owner') === OWNER_SECRET) {
+    showOwnerDashboard();
+    return;
+  }
+
+  if (SHOP_ID && APP.config.wizardComplete) {
+    // Known device with completed setup — go straight to login
+    CURRENT_PLAN = APP.config.plan || 'free';
     _showLoginScreen();
     applyLoginTranslations();
     updateLoginToggles();
+  } else if (SHOP_ID && !APP.config.wizardComplete) {
+    // Known shop ID but wizard not done — complete setup
+    document.getElementById('wizard-screen').style.display = 'flex';
+    initWizard();
+  } else {
+    // New device — show shop code entry screen
+    showShopCodeScreen();
   }
 })();
 
@@ -7278,6 +7451,7 @@ const EXPORT_SECTIONS_DASH = [
 ];
 
 function openExportModal(source) {
+  if (!checkExportAllowed()) return;
   EXPORT_SOURCE = source;
   EXPORT_PERIOD = source === 'dashboard' ? 'today' : (FIN_PERIOD || 'month');
 
@@ -7929,6 +8103,423 @@ function voidSale(saleId) {
 function setSaleNote(saleId, note) {
   updateData(d => ({ ...d, sales: d.sales.map(s => s.id === saleId ? { ...s, note: note.trim() } : s) }));
   updateSaleNote_db(saleId, note.trim()).catch(e => console.warn('[DB] setSaleNote:', e));
+}
+
+
+
+/* ================================================================
+   PASSAGE POS — SaaS Layer
+   Multi-tenant: Registration, Shop Code Login, Owner Dashboard,
+   Plan enforcement, Email via Resend
+   ================================================================ */
+
+const RESEND_API_KEY = 're_eKRCRBYt_PDpPPPN9kMrhhGZSn79PvMuD';
+const OWNER_EMAIL    = 'thehannibal82@gmail.com';
+const OWNER_SECRET   = 'thehannibal82';   // ?owner=thehannibal82 in URL
+const APP_URL        = 'https://passage-pos.netlify.app';
+
+const PLAN_LIMITS = {
+  free: { maxItems: 50, maxUsers: 2, historyDays: 30, csvExport: false, realtime: false },
+  pro:  { maxItems: Infinity, maxUsers: 10, historyDays: 365, csvExport: true, realtime: true },
+};
+
+let CURRENT_PLAN = 'free';
+
+function getPlanLimits() {
+  return PLAN_LIMITS[CURRENT_PLAN] || PLAN_LIMITS.free;
+}
+
+/* ── EMAIL via Resend ── */
+async function sendEmail(to, subject, html) {
+  try {
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + RESEND_API_KEY,
+      },
+      body: JSON.stringify({
+        from: 'Passage POS <onboarding@resend.dev>',
+        to: [to],
+        subject,
+        html,
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) console.warn('[Email] Failed:', data);
+    return res.ok;
+  } catch(e) {
+    console.warn('[Email] Error:', e);
+    return false;
+  }
+}
+
+function emailRequestNotification(req) {
+  return sendEmail(
+    OWNER_EMAIL,
+    '\uD83C\uDFEA New Shop Request: ' + req.shop_name,
+    `<div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:24px">
+      <h2 style="color:#c99a3a">New Shop Request</h2>
+      <table style="width:100%;border-collapse:collapse">
+        <tr><td style="padding:6px 0;color:#666;width:140px">Shop Name</td><td style="font-weight:600">${req.shop_name}</td></tr>
+        <tr><td style="padding:6px 0;color:#666">Owner</td><td>${req.owner_name}</td></tr>
+        <tr><td style="padding:6px 0;color:#666">Email</td><td>${req.email}</td></tr>
+        <tr><td style="padding:6px 0;color:#666">Phone</td><td>${req.phone || '—'}</td></tr>
+        <tr><td style="padding:6px 0;color:#666">Business Type</td><td>${req.business_type}</td></tr>
+        <tr><td style="padding:6px 0;color:#666">Plan</td><td><strong>${req.plan.toUpperCase()}</strong></td></tr>
+      </table>
+      <div style="margin-top:24px;display:flex;gap:12px">
+        <a href="${APP_URL}?owner=${OWNER_SECRET}" style="background:#c99a3a;color:#000;padding:10px 20px;border-radius:6px;text-decoration:none;font-weight:600">Open Dashboard</a>
+      </div>
+      <p style="color:#999;font-size:12px;margin-top:24px">Passage POS · ${new Date().toLocaleDateString()}</p>
+    </div>`
+  );
+}
+
+function emailApprovalNotification(ownerEmail, shopName, shopCode, plan) {
+  return sendEmail(
+    ownerEmail,
+    '\u2705 Your Passage POS is Ready: ' + shopName,
+    `<div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:24px">
+      <h2 style="color:#c99a3a">You're approved!</h2>
+      <p>Hi, your shop <strong>${shopName}</strong> has been approved on Passage POS.</p>
+      <div style="background:#f5f0e8;border-radius:8px;padding:16px 20px;margin:20px 0;text-align:center">
+        <div style="font-size:12px;color:#666;margin-bottom:4px">Your Shop ID</div>
+        <div style="font-size:32px;font-weight:700;letter-spacing:4px;color:#c99a3a">${shopCode}</div>
+        <div style="font-size:12px;color:#666;margin-top:4px">Keep this safe — you'll need it to log in from any device</div>
+      </div>
+      <p>Your plan: <strong>${plan.toUpperCase()}</strong></p>
+      <div style="margin-top:20px">
+        <a href="${APP_URL}" style="background:#c99a3a;color:#000;padding:12px 24px;border-radius:6px;text-decoration:none;font-weight:600;display:inline-block">Set Up Your Shop</a>
+      </div>
+      <ol style="color:#444;margin-top:24px;line-height:1.8">
+        <li>Click the button above</li>
+        <li>Enter your Shop ID: <strong>${shopCode}</strong></li>
+        <li>Complete the setup wizard</li>
+        <li>Start selling!</li>
+      </ol>
+      <p style="color:#999;font-size:12px;margin-top:24px">Passage POS · Intercontinental Passage</p>
+    </div>`
+  );
+}
+
+function emailRejectionNotification(ownerEmail, shopName) {
+  return sendEmail(
+    ownerEmail,
+    'Update on your Passage POS request',
+    `<div style="font-family:sans-serif;max-width:520px;margin:0 auto;padding:24px">
+      <h2>Update on your request</h2>
+      <p>Hi, thank you for your interest in Passage POS.</p>
+      <p>Unfortunately we're unable to approve your request for <strong>${shopName}</strong> at this time.</p>
+      <p>If you have questions, please reply to this email.</p>
+      <p style="color:#999;font-size:12px;margin-top:24px">Passage POS · Intercontinental Passage</p>
+    </div>`
+  );
+}
+
+/* ── REGISTRATION ── */
+async function submitRegistration() {
+  const btn       = document.getElementById('reg-submit-btn');
+  const errEl     = document.getElementById('reg-error');
+  const shopName  = document.getElementById('reg-shop-name')?.value.trim();
+  const ownerName = document.getElementById('reg-owner-name')?.value.trim();
+  const email     = document.getElementById('reg-email')?.value.trim();
+  const phone     = document.getElementById('reg-phone')?.value.trim();
+  const bizType   = document.getElementById('reg-biz-type')?.value;
+  const plan      = document.querySelector('input[name="reg-plan"]:checked')?.value || 'free';
+
+  if (!shopName)  { errEl.textContent = 'Please enter your shop name.'; return; }
+  if (!ownerName) { errEl.textContent = 'Please enter your name.'; return; }
+  if (!email || !email.includes('@')) { errEl.textContent = 'Please enter a valid email.'; return; }
+
+  btn.textContent = 'Submitting…';
+  btn.disabled = true;
+  errEl.textContent = '';
+
+  try {
+    // Check if email already has a request
+    const { data: existing } = await sb.from('shop_requests').select('id, status').eq('email', email).single();
+    if (existing) {
+      if (existing.status === 'pending') {
+        errEl.textContent = 'A request with this email is already pending. We\'ll be in touch!';
+      } else if (existing.status === 'approved') {
+        errEl.textContent = 'This email is already approved. Check your inbox for your Shop ID.';
+      } else {
+        errEl.textContent = 'A previous request with this email was rejected. Contact us for help.';
+      }
+      btn.textContent = 'Request Access';
+      btn.disabled = false;
+      return;
+    }
+
+    // Insert request
+    const { data: req, error } = await sb.from('shop_requests').insert({
+      shop_name: shopName, owner_name: ownerName, email, phone, business_type: bizType, plan,
+    }).select().single();
+
+    if (error) throw error;
+
+    // Send owner notification
+    await emailRequestNotification(req);
+
+    // Show success screen
+    document.getElementById('registration-screen').style.display = 'none';
+    showRegistrationSuccess(ownerName, email);
+
+  } catch(e) {
+    console.error('[Reg]', e);
+    errEl.textContent = 'Something went wrong. Please try again.';
+    btn.textContent = 'Request Access';
+    btn.disabled = false;
+  }
+}
+
+function showRegistrationSuccess(name, email) {
+  const s = document.getElementById('reg-success-screen');
+  if (s) {
+    document.getElementById('reg-success-name').textContent = name;
+    document.getElementById('reg-success-email').textContent = email;
+    s.style.display = 'flex';
+  }
+}
+
+/* ── SHOP CODE LOGIN ── */
+async function lookupShopCode() {
+  const codeEl = document.getElementById('shop-code-input');
+  const errEl  = document.getElementById('shop-code-error');
+  const btn    = document.getElementById('shop-code-btn');
+  const raw    = codeEl?.value.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+  const code   = raw.length === 7 ? raw.substring(0,3) + '-' + raw.substring(3) : codeEl?.value.trim().toUpperCase();
+
+  if (!code || code.length < 7) { errEl.textContent = 'Enter your Shop ID (e.g. POS-A3F9)'; return; }
+
+  btn.textContent = 'Finding…';
+  btn.disabled = true;
+  errEl.textContent = '';
+
+  try {
+    const { data: shop, error } = await sb.from('shops')
+      .select('id, shop_name, shop_code, status, plan, shop_logo, shop_icon, users')
+      .eq('shop_code', code)
+      .single();
+
+    if (error || !shop) {
+      errEl.textContent = 'Shop not found. Check your Shop ID and try again.';
+      btn.textContent = 'Find Shop';
+      btn.disabled = false;
+      return;
+    }
+
+    if (shop.status === 'suspended') {
+      errEl.textContent = 'This shop has been suspended. Contact support.';
+      btn.textContent = 'Find Shop';
+      btn.disabled = false;
+      return;
+    }
+
+    // Save shop ID
+    SHOP_ID = shop.id;
+    CURRENT_PLAN = shop.plan || 'free';
+    localStorage.setItem('pos_shop_id', SHOP_ID);
+
+    // Load full data
+    btn.textContent = 'Loading…';
+    await syncFromSupabase();
+
+    // Go to login screen
+    document.getElementById('shop-code-screen').style.display = 'none';
+    _showLoginScreen();
+    applyLoginTranslations();
+
+  } catch(e) {
+    console.error('[ShopCode]', e);
+    errEl.textContent = 'Connection error. Try again.';
+    btn.textContent = 'Find Shop';
+    btn.disabled = false;
+  }
+}
+
+/* ── PLAN ENFORCEMENT ── */
+function checkPlanLimit(type) {
+  const limits = getPlanLimits();
+  if (type === 'items' && APP.data.items.length >= limits.maxItems) {
+    toast('Free plan limit: ' + limits.maxItems + ' products. Upgrade to Pro for unlimited.', 'error');
+    return false;
+  }
+  if (type === 'users' && (APP.config.users || []).length >= limits.maxUsers) {
+    toast('Free plan limit: ' + limits.maxUsers + ' users. Upgrade to Pro for more.', 'error');
+    return false;
+  }
+  return true;
+}
+
+function checkExportAllowed() {
+  if (!getPlanLimits().csvExport) {
+    toast('CSV Export is a Pro feature. Upgrade to unlock.', 'error');
+    return false;
+  }
+  return true;
+}
+
+/* ── OWNER DASHBOARD ── */
+async function renderOwnerDashboard() {
+  const container = document.getElementById('owner-dashboard-content');
+  if (!container) return;
+  container.innerHTML = '<div style="padding:32px;text-align:center;color:var(--muted-fg)">Loading…</div>';
+
+  try {
+    // Load pending requests
+    const { data: requests } = await sb.from('shop_requests').select('*').order('created_at', { ascending: false });
+    // Load all shops
+    const { data: shops } = await sb.from('shops').select('id,shop_name,shop_code,plan,status,owner_email,owner_name,owner_phone,wizard_complete,created_at').order('created_at', { ascending: false });
+
+    const pending   = (requests || []).filter(r => r.status === 'pending');
+    const approved  = (requests || []).filter(r => r.status === 'approved');
+    const rejected  = (requests || []).filter(r => r.status === 'rejected');
+
+    container.innerHTML = `
+      <div style="max-width:900px;margin:0 auto;padding:24px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:28px">
+          <div>
+            <h1 style="font-size:1.6rem;font-weight:700;margin:0">Owner Dashboard</h1>
+            <div style="font-size:.8rem;color:var(--muted-fg);margin-top:3px">Passage POS · Intercontinental Passage</div>
+          </div>
+          <div style="display:flex;gap:10px">
+            <div style="text-align:center;padding:10px 16px;background:var(--card);border-radius:8px;border:1px solid var(--border)">
+              <div style="font-size:1.4rem;font-weight:700;color:hsl(38,90%,62%)">${pending.length}</div>
+              <div style="font-size:.7rem;color:var(--muted-fg)">Pending</div>
+            </div>
+            <div style="text-align:center;padding:10px 16px;background:var(--card);border-radius:8px;border:1px solid var(--border)">
+              <div style="font-size:1.4rem;font-weight:700;color:hsl(160,55%,55%)">${(shops||[]).filter(s=>s.status==='active').length}</div>
+              <div style="font-size:.7rem;color:var(--muted-fg)">Active</div>
+            </div>
+            <div style="text-align:center;padding:10px 16px;background:var(--card);border-radius:8px;border:1px solid var(--border)">
+              <div style="font-size:1.4rem;font-weight:700;color:var(--fg)">${(shops||[]).length}</div>
+              <div style="font-size:.7rem;color:var(--muted-fg)">Total Shops</div>
+            </div>
+          </div>
+        </div>
+
+        ${pending.length > 0 ? `
+        <div style="margin-bottom:28px">
+          <h2 style="font-size:1rem;font-weight:700;margin:0 0 12px;color:hsl(38,90%,62%)">⏳ Pending Requests (${pending.length})</h2>
+          ${pending.map(r => `
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:10px">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+              <div style="flex:1">
+                <div style="font-weight:700;font-size:.95rem">${r.shop_name}</div>
+                <div style="font-size:.78rem;color:var(--muted-fg);margin-top:3px">${r.owner_name} · ${r.email} · ${r.phone||'—'}</div>
+                <div style="display:flex;gap:6px;margin-top:6px">
+                  <span style="font-size:.68rem;padding:2px 8px;border-radius:999px;background:hsla(40,74%,60%,.15);color:var(--primary)">${r.business_type}</span>
+                  <span style="font-size:.68rem;padding:2px 8px;border-radius:999px;background:${r.plan==='pro'?'hsla(270,60%,65%,.15)':'hsla(0,0%,50%,.1)'};color:${r.plan==='pro'?'hsl(270,60%,65%)':'var(--muted-fg)'}">${r.plan.toUpperCase()}</span>
+                  <span style="font-size:.68rem;color:var(--muted-fg)">${new Date(r.created_at).toLocaleDateString()}</span>
+                </div>
+              </div>
+              <div style="display:flex;gap:6px;flex-shrink:0">
+                <button onclick="approveRequest('${r.id}','${r.shop_name}','${r.owner_name}','${r.email}','${r.phone||''}','${r.business_type}','${r.plan}')" style="padding:6px 14px;border-radius:6px;border:none;background:hsl(160,55%,45%);color:#fff;font-weight:600;font-size:.8rem;cursor:pointer">✓ Approve</button>
+                <button onclick="rejectRequest('${r.id}','${r.shop_name}','${r.email}')" style="padding:6px 14px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--muted-fg);font-weight:600;font-size:.8rem;cursor:pointer">✗ Reject</button>
+              </div>
+            </div>
+          </div>`).join('')}
+        </div>` : ''}
+
+        <div>
+          <h2 style="font-size:1rem;font-weight:700;margin:0 0 12px">🏪 All Shops</h2>
+          <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden">
+            <table style="width:100%;border-collapse:collapse">
+              <thead><tr style="border-bottom:1px solid var(--border)">
+                <th style="text-align:left;padding:10px 14px;font-size:.72rem;color:var(--muted-fg);font-weight:600">SHOP</th>
+                <th style="text-align:left;padding:10px 14px;font-size:.72rem;color:var(--muted-fg);font-weight:600">CODE</th>
+                <th style="text-align:left;padding:10px 14px;font-size:.72rem;color:var(--muted-fg);font-weight:600">OWNER</th>
+                <th style="text-align:left;padding:10px 14px;font-size:.72rem;color:var(--muted-fg);font-weight:600">PLAN</th>
+                <th style="text-align:left;padding:10px 14px;font-size:.72rem;color:var(--muted-fg);font-weight:600">STATUS</th>
+                <th style="padding:10px 14px;font-size:.72rem;color:var(--muted-fg);font-weight:600">ACTIONS</th>
+              </tr></thead>
+              <tbody>
+                ${(shops||[]).map(s => `
+                <tr style="border-bottom:1px solid var(--border)">
+                  <td style="padding:10px 14px;font-weight:600;font-size:.85rem">${s.shop_name}</td>
+                  <td style="padding:10px 14px;font-family:monospace;font-size:.85rem;color:var(--primary)">${s.shop_code||'—'}</td>
+                  <td style="padding:10px 14px;font-size:.78rem;color:var(--muted-fg)">${s.owner_name||'—'}<br>${s.owner_email||''}</td>
+                  <td style="padding:10px 14px">
+                    <select onchange="updateShopPlan('${s.id}',this.value)" style="font-size:.75rem;border:1px solid var(--border);border-radius:5px;background:var(--bg);color:var(--fg);padding:3px 6px">
+                      <option value="free" ${s.plan==='free'?'selected':''}>Free</option>
+                      <option value="pro"  ${s.plan==='pro'?'selected':''}>Pro</option>
+                    </select>
+                  </td>
+                  <td style="padding:10px 14px">
+                    <span style="font-size:.7rem;padding:2px 8px;border-radius:999px;background:${s.status==='active'?'hsla(160,55%,55%,.15)':'hsla(0,62%,60%,.15)'};color:${s.status==='active'?'hsl(160,55%,55%)':'hsl(0,62%,60%)'}">${s.status}</span>
+                  </td>
+                  <td style="padding:10px 14px;text-align:center">
+                    <button onclick="toggleShopStatus('${s.id}','${s.status}')" style="font-size:.72rem;padding:3px 9px;border-radius:5px;border:1px solid var(--border);background:transparent;color:var(--muted-fg);cursor:pointer">
+                      ${s.status==='active'?'Suspend':'Reactivate'}
+                    </button>
+                  </td>
+                </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    `;
+  } catch(e) {
+    container.innerHTML = '<div style="padding:32px;text-align:center;color:hsl(0,62%,60%)">Error loading dashboard: ' + e.message + '</div>';
+  }
+}
+
+async function approveRequest(reqId, shopName, ownerName, email, phone, bizType, plan) {
+  if (!confirm('Approve "' + shopName + '" on ' + plan + ' plan?')) return;
+
+  try {
+    // Create shop in Supabase
+    const { data: shop, error } = await sb.from('shops').insert({
+      shop_name: shopName, owner_name: ownerName, owner_email: email, owner_phone: phone,
+      business_type: bizType, plan, status: 'active', wizard_complete: false,
+      request_id: reqId,
+      users: [
+        { username: 'admin', password: 'admin123', role: 'admin' },
+        { username: 'cashier', password: 'cashier123', role: 'cashier' }
+      ],
+      modules: { sales:true, inventory:true, stock:true, customers:true, finance:true, barcode:false },
+      categories: ['Products','Services','Other'],
+    }).select().single();
+
+    if (error) throw error;
+
+    // Mark request as approved
+    await sb.from('shop_requests').update({ status: 'approved', approved_at: new Date().toISOString() }).eq('id', reqId);
+
+    // Send approval email with shop code
+    await emailApprovalNotification(email, shopName, shop.shop_code, plan);
+
+    toast('✓ Approved! Email sent to ' + email + ' with code ' + shop.shop_code, 'success');
+    renderOwnerDashboard();
+
+  } catch(e) {
+    console.error('[Approve]', e);
+    toast('Error: ' + e.message, 'error');
+  }
+}
+
+async function rejectRequest(reqId, shopName, email) {
+  if (!confirm('Reject request from "' + shopName + '"?')) return;
+  await sb.from('shop_requests').update({ status: 'rejected', rejected_at: new Date().toISOString() }).eq('id', reqId);
+  await emailRejectionNotification(email, shopName);
+  toast('Request rejected', 'success');
+  renderOwnerDashboard();
+}
+
+async function updateShopPlan(shopId, plan) {
+  await sb.from('shops').update({ plan }).eq('id', shopId);
+  toast('Plan updated to ' + plan.toUpperCase(), 'success');
+}
+
+async function toggleShopStatus(shopId, currentStatus) {
+  const newStatus = currentStatus === 'active' ? 'suspended' : 'active';
+  if (!confirm('Set shop to ' + newStatus + '?')) return;
+  await sb.from('shops').update({ status: newStatus }).eq('id', shopId);
+  toast('Shop ' + newStatus, 'success');
+  renderOwnerDashboard();
 }
 
 /* ================================================================
