@@ -8146,10 +8146,18 @@ async function sendEmail(to, subject, html) {
       }),
     });
     const data = await res.json();
-    if (!res.ok) console.warn('[Email] Failed:', data);
+    if (!res.ok) {
+      console.warn('[Email] Failed to ' + to + ':', JSON.stringify(data));
+      // On free tier, can only send to verified email — log details clearly
+      if (data.statusCode === 403 || data.name === 'validation_error') {
+        console.warn('[Email] Resend free tier: can only send to thehannibal82@gmail.com until a domain is verified at resend.com/domains');
+      }
+    } else {
+      console.log('[Email] Sent to ' + to + ': ' + subject);
+    }
     return res.ok;
   } catch(e) {
-    console.warn('[Email] Error:', e);
+    console.warn('[Email] Network error:', e.message);
     return false;
   }
 }
@@ -8259,10 +8267,13 @@ async function submitRegistration() {
 
     if (error) throw error;
 
-    // Send owner notification
-    await emailRequestNotification(req);
+    // Send owner notification (best effort — free Resend tier may limit recipients)
+    const emailSent = await emailRequestNotification(req);
+    if (!emailSent) {
+      console.warn('[Email] Owner notification failed — check Resend dashboard or verify domain at resend.com/domains');
+    }
 
-    // Show success screen
+    // Show success screen regardless of email status
     document.getElementById('registration-screen').style.display = 'none';
     showRegistrationSuccess(ownerName, email);
 
