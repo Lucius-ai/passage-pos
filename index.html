@@ -7522,14 +7522,19 @@ function globalScanAdd(barcode) {
     const dash = document.getElementById('owner-dashboard-screen');
     if (dash) {
       dash.style.display = 'flex';
-      renderOwnerDashboard().catch(e => {
+      const ownerContent = document.getElementById('owner-dashboard-content');
+      if (ownerContent) ownerContent.innerHTML = '<div style="padding:40px;text-align:center;color:#888">Loading dashboard…</div>';
+      try {
+        await renderOwnerDashboard();
+      } catch(e) {
         console.error('[Dashboard]', e);
-        dash.innerHTML = '<div style="padding:40px;text-align:center;color:hsl(0,62%,60%)">' +
-          '<div style="font-size:1.1rem;font-weight:700;margin-bottom:8px">Dashboard Error</div>' +
-          '<div style="font-size:.875rem">' + e.message + '</div>' +
-          '<button onclick="location.reload()" style="margin-top:16px;padding:8px 20px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--fg);cursor:pointer">Retry</button>' +
-        '</div>';
-      });
+        if (ownerContent) ownerContent.innerHTML =
+          '<div style="padding:40px;text-align:center">' +
+          '<div style="color:hsl(0,62%,60%);font-size:1rem;font-weight:700;margin-bottom:8px">Error: ' + e.message + '</div>' +
+          '<div style="color:#888;font-size:.8rem;margin-bottom:16px">Check browser console for details</div>' +
+          '<button onclick="location.reload()" style="padding:8px 20px;border-radius:8px;border:1px solid #888;background:transparent;color:#888;cursor:pointer">Retry</button>' +
+          '</div>';
+      }
     }
     return;
   }
