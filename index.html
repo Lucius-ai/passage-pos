@@ -7514,9 +7514,13 @@ function globalScanAdd(barcode) {
     document.documentElement.setAttribute('data-theme', CURRENT_THEME);
     const loadEl = document.getElementById('boot-loading');
     if (loadEl) loadEl.style.display = 'none';
-    document.querySelectorAll('.pos-screen').forEach(s => s.style.display = 'none');
     document.getElementById('app-shell').style.display = 'none';
-    showOwnerDashboard();
+    // Hide all screens except owner dashboard
+    document.querySelectorAll('.pos-screen').forEach(s => {
+      if (s.id !== 'owner-dashboard-screen') s.style.display = 'none';
+    });
+    const dash = document.getElementById('owner-dashboard-screen');
+    if (dash) { dash.style.display = 'flex'; renderOwnerDashboard(); }
     return;
   }
 
